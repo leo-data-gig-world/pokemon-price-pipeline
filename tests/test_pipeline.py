@@ -88,6 +88,6 @@ def test_dag_loads():
     from airflow.models import DagBag
     bag = DagBag(dag_folder=str(Path(__file__).parents[1] / "dags"))
     assert bag.import_errors == {}
-    d = bag.get_dag("pokemon_prices")
+    d = bag.dags["pokemon_prices"]  # in-memory; get_dag() needs a database in Airflow 3
     assert [t.task_id for t in d.tasks] == ["extract_prices", "check_quality"]
     assert d.default_args["retries"] == 2
