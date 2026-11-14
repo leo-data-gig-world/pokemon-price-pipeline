@@ -34,3 +34,19 @@ unit_tests:
         - {price_key: k6, is_spike: false}
         - {price_key: k7, is_spike: false}
         - {price_key: k8, is_spike: true}
+
+  - name: day_change_ignores_gaps
+    description: >
+      A missing day must not turn "change vs yesterday" into "change vs two days ago".
+    model: fct_daily_prices
+    given:
+      - input: ref('stg_prices')
+        rows:
+          - {price_key: a1, price_date: 2026-11-01, card_id: c, source: tcgplayer, variant: holofoil, market: 10}
+          - {price_key: a2, price_date: 2026-11-02, card_id: c, source: tcgplayer, variant: holofoil, market: 12}
+          - {price_key: a4, price_date: 2026-11-04, card_id: c, source: tcgplayer, variant: holofoil, market: 15}
+    expect:
+      rows:
+        - {price_key: a1, day_change_pct: null}
+        - {price_key: a2, day_change_pct: 20.0}
+        - {price_key: a4, day_change_pct: null}
