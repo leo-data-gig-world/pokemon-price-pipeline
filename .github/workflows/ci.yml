@@ -1,0 +1,33 @@
+name: ci
+
+# Every pull request and every code push: lint, unit tests, and a DAG import test
+# with real Airflow. Merging to main ships the code to the next scheduled run.
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths-ignore: ["lake/**"]
+
+env:
+  AIRFLOW_VERSION: "3.3.2"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install
+        run: |
+          pip install "apache-airflow==${AIRFLOW_VERSION}" \
+            --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+          pip install -r requirements.txt -r requirements-dev.txt
+      - name: Lint
+        run: ruff check .
+      - name: Tests (incl. DAG loads in Airflow)
+        run: pytest -q

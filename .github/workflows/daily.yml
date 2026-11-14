@@ -1,0 +1,66 @@
+name: daily-pipeline
+
+# Runs the real Airflow DAG once a day on a fresh GitHub machine, then saves the data.
+on:
+  schedule:
+    - cron: "30 6 * * *"          # 06:30 UTC; prices refresh around 03:00 UTC
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Run date YYYY-MM-DD (blank = today). Use this to backfill a day."
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-pipeline
+  cancel-in-progress: false
+
+env:
+  AIRFLOW_VERSION: "3.3.2"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      AIRFLOW_HOME: ${{ github.workspace }}/.airflow
+      AIRFLOW__CORE__DAGS_FOLDER: ${{ github.workspace }}/dags
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      INPUT_DATE: ${{ inputs.date }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install Airflow and pipeline deps
+        run: |
+          pip install "apache-airflow==${AIRFLOW_VERSION}" \
+            --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+          pip install -r requirements.txt
+      - name: Run the DAG
+        run: |
+          DS="${INPUT_DATE:-$(date -u +%F)}"
+          [[ "$DS" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "bad date: $DS"; exit 1; }
+          echo "DS=$DS" >> "$GITHUB_ENV"
+          airflow db migrate
+          airflow dags test pokemon_prices "$DS"
+      - name: Fail the job if data quality failed
+        run: |
+          python - <<'PY'
+          import json, os, sys
+          r = json.load(open(f"lake/_health/{os.environ['DS']}.json"))
+          print(json.dumps(r, indent=2))
+          sys.exit(0 if r["passed"] else 1)
+          PY
+      - name: Save the day's data
+        run: |
+          git config user.name "pipeline-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lake
+          git commit -m "data: prices for ${DS}" || { echo "nothing new"; exit 0; }
+          git pull --rebase && git push
