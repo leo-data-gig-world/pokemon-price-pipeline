@@ -59,6 +59,8 @@ def lake(tmp_path, monkeypatch):
     monkeypatch.setattr(checks, "LAKE", tmp_path)
     from pipeline import summary
     monkeypatch.setattr(summary, "LAKE", tmp_path)
+    from pipeline import spikes
+    monkeypatch.setattr(spikes, "LAKE", tmp_path)
     return tmp_path
 
 
@@ -91,7 +93,7 @@ def test_dag_loads():
     bag = DagBag(dag_folder=str(Path(__file__).parents[1] / "dags"))
     assert bag.import_errors == {}
     d = bag.dags["pokemon_prices"]  # in-memory; get_dag() needs a database in Airflow 3
-    assert [t.task_id for t in d.tasks] == ["extract_prices", "check_quality", "publish_summary"]
+    assert sorted(t.task_id for t in d.tasks) == sorted(["extract_prices", "check_quality", "dbt_build", "publish_summary", "alert_spikes"])
     assert d.default_args["retries"] == 2
 
 
@@ -109,3 +111,20 @@ def test_summary_top_cards_and_movers(lake):
     assert out["top_cards"][0]["price_usd"] == 36.0
     assert out["compared_to"] == "2026-11-01"
     assert out["movers"][0]["change_pct"] == 20.0
+
+
+def test_spike_alert_ignores_empty_export_and_other_days(lake, monkeypatch):
+    from pipeline import spikes
+    sent = []
+    monkeypatch.setattr(spikes.alerts, "send", sent.append)
+    (lake / "marts").mkdir()
+    (lake / "_health").mkdir()
+    rows = [{"price_date": None, "card_name": None},
+            {"price_date": dt.date(2026, 11, 1), "card_name": "old"},
+            {"price_date": dt.date(2026, 11, 2), "card_name": "Umbreon ex"}]
+    tbl = pa.Table.from_pylist([{**r, "set_id": "s", "source": "tcgplayer", "variant": "holofoil",
+                                 "market": 20.0, "currency": "USD", "avg_prev_7d": 10.0,
+                                 "zscore_7d": 12.2} for r in rows])
+    pq.write_table(tbl, lake / "marts" / "price_spikes.parquet")
+    assert spikes.alert("2026-11-02") == 1
+    assert "Umbreon ex" in sent[0]

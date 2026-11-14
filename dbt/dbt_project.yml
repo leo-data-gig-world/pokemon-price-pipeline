@@ -1,0 +1,22 @@
+name: pokemon_prices
+version: "1.0"
+config-version: 2
+profile: pokemon_prices
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: target
+clean-targets: [target]
+
+models:
+  pokemon_prices:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
+
+vars:
+  spike_z: 3          # flag a price this many standard deviations from its trailing week
+  spike_min_price: 2  # ignore cheap cards: tiny prices make huge, meaningless swings
+  spike_min_days: 5   # need at least this many prior days in the window to judge

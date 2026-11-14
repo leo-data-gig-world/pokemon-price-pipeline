@@ -8,10 +8,11 @@ Designed around the parts of data engineering that matter in production:
 
 ```
                       Airflow DAG  pokemon_prices  (daily 06:30 UTC)
- TCGdex API ──► extract_prices ──► check_quality ──► publish_summary ──► lake/_health/summary.json
- (Cardmarket EUR,        │                     │
-  TCGplayer USD)         ▼                     └─ fails? retry x2, then alert
-          lake/raw/prices/date=YYYY-MM-DD/prices.parquet
+ TCGdex API ──► extract_prices ──► check_quality ──► dbt_build ──┬──► publish_summary ──► site summary
+ (Cardmarket EUR,        │                                 │       └──► alert_spikes ────► Discord / site
+  TCGplayer USD)         ▼                                 ▼
+     lake/raw/prices/date=YYYY-MM-DD/      dbt on DuckDB: stg → fct_daily_prices → price_spikes
+                                           (any task fails: retry x2, then alert)
 ```
 
 ## How it runs (and why this way)
@@ -31,10 +32,19 @@ and web UI, which a one-task-a-day pipeline doesn't need.
 | Idempotent loads | `partition_path()` + atomic file swap | Re-running a day overwrites only that day. Safe retries, safe backfills |
 | Data quality gate | [`pipeline/checks.py`](pipeline/checks.py) | Row count, drop vs yesterday, null keys, % priced, source freshness |
 | DAG | [`dags/pokemon_prices.py`](dags/pokemon_prices.py) | TaskFlow API, retries, failure callback, `catchup=False`, light top-level imports |
+| dbt models | [`dbt/`](dbt) | DuckDB reading the Parquet lake directly; staging → fact with trailing-week stats → spikes exported back to the lake |
+| Spike detection | [`fct_daily_prices.sql`](dbt/models/marts/fct_daily_prices.sql) | z-score vs a 7-*calendar*-day RANGE window (not ROWS, so a missed day can't stretch the window), with minimum-history and minimum-price guards |
+| dbt tests | [`_marts.yml`](dbt/models/marts/_marts.yml) | Unique/not-null keys, accepted values, a custom `positive` test, a currency-vs-marketplace check, and a **unit test** for the spike logic |
+| Spike alerts | [`pipeline/spikes.py`](pipeline/spikes.py) | Alerts on today's spikes and publishes them for the site |
 | Summary for the site | [`pipeline/summary.py`](pipeline/summary.py) | Priciest cards and biggest day-on-day movers, read live by my portfolio page |
 | Alerts | [`pipeline/alerts.py`](pipeline/alerts.py) | Discord webhook on final failure; GitHub emails on a failed run |
 | CI | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Lint, unit tests, and a test that the DAG loads in real Airflow, on every PR |
 | Scheduled run | [`.github/workflows/daily.yml`](.github/workflows/daily.yml) | Cron schedule, manual backfill by date, run fails if quality fails |
+
+dbt runs in its own virtualenv, so its dependencies never fight Airflow's pinned
+constraints. The warehouse is rebuilt from the immutable raw lake on every run: at
+this size a full rebuild is cheaper and simpler than incremental models, and it makes
+any logic change apply to all history at once.
 
 Merging to `main` ships the code to the next scheduled run (continuous delivery,
 without a server to deploy to).
@@ -61,5 +71,5 @@ Backfill a day: **Actions → daily-pipeline → Run workflow**, then enter the 
 ## Roadmap
 
 - [x] Phase 1: Airflow DAG, Parquet lake partitioned by date, quality gate, alerts, CI
-- [ ] Phase 2: dbt on DuckDB: staging, price-history snapshots, daily facts, a spike-detection test
+- [x] Phase 2: dbt on DuckDB: staging, daily facts with trailing-week stats, spike detection + alerts, unit tests
 - [ ] Phase 3: a live page with today's biggest price movers and pipeline health

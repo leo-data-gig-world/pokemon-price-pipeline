@@ -11,6 +11,7 @@ on:
 env:
   AIRFLOW_VERSION: "3.3.2"
   PYTHON_VERSION: "3.12"
+  DBT_DUCKDB_VERSION: "1.11.1"
 
 jobs:
   test:
@@ -33,3 +34,8 @@ jobs:
         run: ruff check .
       - name: Tests (incl. DAG loads in Airflow)
         run: pytest -q
+      - name: dbt build on the real lake (models, data tests, unit tests)
+        run: |
+          python -m venv .venv-dbt
+          .venv-dbt/bin/pip install -q "dbt-duckdb==${DBT_DUCKDB_VERSION}"
+          .venv-dbt/bin/dbt build --project-dir dbt --profiles-dir dbt

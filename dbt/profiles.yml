@@ -1,0 +1,8 @@
+pokemon_prices:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      # Throwaway warehouse: everything is rebuilt from the Parquet lake each run.
+      path: "{{ env_var('DUCKDB_PATH', 'dbt/target/prices.duckdb') }}"
+      threads: 4

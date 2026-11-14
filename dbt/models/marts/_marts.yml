@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: fct_daily_prices
+    description: One row per card x marketplace x variant x day, with trailing-week stats.
+    columns:
+      - name: price_key
+        data_tests: [unique, not_null]
+
+unit_tests:
+  - name: spike_flagged_only_after_enough_history
+    description: >
+      Seven ordinary days then a jump to double the price. Only the jump is a spike;
+      early days lack history, and normal wobble stays under the threshold.
+    model: fct_daily_prices
+    given:
+      - input: ref('stg_prices')
+        rows:
+          - {price_key: k1, price_date: 2026-11-01, card_id: c, source: tcgplayer, variant: holofoil, market: 10}
+          - {price_key: k2, price_date: 2026-11-02, card_id: c, source: tcgplayer, variant: holofoil, market: 11}
+          - {price_key: k3, price_date: 2026-11-03, card_id: c, source: tcgplayer, variant: holofoil, market: 9}
+          - {price_key: k4, price_date: 2026-11-04, card_id: c, source: tcgplayer, variant: holofoil, market: 10}
+          - {price_key: k5, price_date: 2026-11-05, card_id: c, source: tcgplayer, variant: holofoil, market: 11}
+          - {price_key: k6, price_date: 2026-11-06, card_id: c, source: tcgplayer, variant: holofoil, market: 9}
+          - {price_key: k7, price_date: 2026-11-07, card_id: c, source: tcgplayer, variant: holofoil, market: 10}
+          - {price_key: k8, price_date: 2026-11-08, card_id: c, source: tcgplayer, variant: holofoil, market: 20}
+    expect:
+      rows:
+        - {price_key: k1, is_spike: false}
+        - {price_key: k2, is_spike: false}
+        - {price_key: k3, is_spike: false}
+        - {price_key: k4, is_spike: false}
+        - {price_key: k5, is_spike: false}
+        - {price_key: k6, is_spike: false}
+        - {price_key: k7, is_spike: false}
+        - {price_key: k8, is_spike: true}

@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: lake
+    description: Raw daily price files written by the Airflow extract task, one folder per day.
+    tables:
+      - name: prices
+        meta:
+          external_location: "read_parquet('{{ env_var('LAKE_DIR', 'lake') }}/raw/prices/*/*.parquet', hive_partitioning = true)"

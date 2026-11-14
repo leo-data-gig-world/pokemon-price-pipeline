@@ -1,6 +1,6 @@
 """Daily Pokemon card price pipeline.
 
-extract_prices -> check_quality -> publish_summary
+extract_prices -> check_quality -> dbt_build -> [publish_summary, alert_spikes]
   * runs daily at 06:30 UTC (prices refresh around 03:00 UTC)
   * each task retries twice, 5 minutes apart, then alerts
   * idempotent: re-running a date overwrites only that date's partition,
@@ -55,12 +55,24 @@ def pokemon_prices():
         return checks.run_checks(ds)
 
     @task
-    def publish_summary(_report: dict) -> dict:
+    def dbt_build(_report: dict) -> None:
+        from pipeline import transform
+        transform.dbt_build()
+
+    @task
+    def publish_summary() -> dict:
         from pipeline import summary
         ds = get_current_context()["ds"]
         return summary.build(ds)
 
-    publish_summary(check_quality(extract_prices()))
+    @task
+    def alert_spikes() -> int:
+        from pipeline import spikes
+        ds = get_current_context()["ds"]
+        return spikes.alert(ds)
+
+    built = dbt_build(check_quality(extract_prices()))
+    built >> [publish_summary(), alert_spikes()]
 
 
 pokemon_prices()
