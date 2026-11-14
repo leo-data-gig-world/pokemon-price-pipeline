@@ -3,7 +3,7 @@
 A small, real data pipeline: every morning it pulls Pokémon card prices from two
 marketplaces, checks the data, and stores one partition per day in a Parquet data lake.
 
-Built to practise the parts of data engineering that matter in production:
+Designed around the parts of data engineering that matter in production:
 **orchestration, idempotent loads, backfills, data quality gates, alerting and CI/CD**.
 
 ```
