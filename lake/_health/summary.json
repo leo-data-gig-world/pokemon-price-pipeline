@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-14",
+  "cards_priced": 1049,
+  "top_cards": [
+    {
+      "card": "Umbreon ex",
+      "set": "sv08.5",
+      "variant": "holofoil",
+      "price_usd": 1186.84
+    },
+    {
+      "card": "Sylveon ex",
+      "set": "sv08.5",
+      "variant": "holofoil",
+      "price_usd": 370.54
+    },
+    {
+      "card": "Charizard ex",
+      "set": "sv03.5",
+      "variant": "holofoil",
+      "price_usd": 291.39
+    },
+    {
+      "card": "Team Rocket's Mewtwo ex",
+      "set": "sv10",
+      "variant": "holofoil",
+      "price_usd": 283.54
+    },
+    {
+      "card": "Leafeon ex",
+      "set": "sv08.5",
+      "variant": "holofoil",
+      "price_usd": 264.82
+    },
+    {
+      "card": "Espeon ex",
+      "set": "sv08.5",
+      "variant": "holofoil",
+      "price_usd": 235.77
+    },
+    {
+      "card": "Glaceon ex",
+      "set": "sv08.5",
+      "variant": "holofoil",
+      "price_usd": 235.53
+    },
+    {
+      "card": "Vaporeon ex",
+      "set": "sv08.5",
+      "variant": "holofoil",
+      "price_usd": 207.44
+    }
+  ],
+  "movers": [],
+  "compared_to": null
+}

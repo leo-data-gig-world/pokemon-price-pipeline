@@ -8,7 +8,7 @@ Built to practise the parts of data engineering that matter in production:
 
 ```
                       Airflow DAG  pokemon_prices  (daily 06:30 UTC)
- TCGdex API ─────► extract_prices ─────► check_quality ─────► lake/_health/latest.json
+ TCGdex API ──► extract_prices ──► check_quality ──► publish_summary ──► lake/_health/summary.json
  (Cardmarket EUR,        │                     │
   TCGplayer USD)         ▼                     └─ fails? retry x2, then alert
           lake/raw/prices/date=YYYY-MM-DD/prices.parquet
@@ -31,6 +31,7 @@ and web UI, which a one-task-a-day pipeline doesn't need.
 | Idempotent loads | `partition_path()` + atomic file swap | Re-running a day overwrites only that day. Safe retries, safe backfills |
 | Data quality gate | [`pipeline/checks.py`](pipeline/checks.py) | Row count, drop vs yesterday, null keys, % priced, source freshness |
 | DAG | [`dags/pokemon_prices.py`](dags/pokemon_prices.py) | TaskFlow API, retries, failure callback, `catchup=False`, light top-level imports |
+| Summary for the site | [`pipeline/summary.py`](pipeline/summary.py) | Priciest cards and biggest day-on-day movers, read live by my portfolio page |
 | Alerts | [`pipeline/alerts.py`](pipeline/alerts.py) | Discord webhook on final failure; GitHub emails on a failed run |
 | CI | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Lint, unit tests, and a test that the DAG loads in real Airflow, on every PR |
 | Scheduled run | [`.github/workflows/daily.yml`](.github/workflows/daily.yml) | Cron schedule, manual backfill by date, run fails if quality fails |

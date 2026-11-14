@@ -57,6 +57,8 @@ def lake(tmp_path, monkeypatch):
     from pipeline import checks, extract
     monkeypatch.setattr(extract, "LAKE", tmp_path)
     monkeypatch.setattr(checks, "LAKE", tmp_path)
+    from pipeline import summary
+    monkeypatch.setattr(summary, "LAKE", tmp_path)
     return tmp_path
 
 
@@ -89,5 +91,21 @@ def test_dag_loads():
     bag = DagBag(dag_folder=str(Path(__file__).parents[1] / "dags"))
     assert bag.import_errors == {}
     d = bag.dags["pokemon_prices"]  # in-memory; get_dag() needs a database in Airflow 3
-    assert [t.task_id for t in d.tasks] == ["extract_prices", "check_quality"]
+    assert [t.task_id for t in d.tasks] == ["extract_prices", "check_quality", "publish_summary"]
     assert d.default_args["retries"] == 2
+
+
+def test_summary_top_cards_and_movers(lake):
+    from pipeline.summary import build
+    def rows(day, price):
+        r = _rows(3, day)
+        for i, x in enumerate(r):
+            x.update(source="tcgplayer", variant="holofoil", market=price * (i + 1), card_name=f"card{i}")
+        return r
+    _write_day(lake, "2026-11-01", rows("2026-11-01", 10.0))
+    _write_day(lake, "2026-11-02", rows("2026-11-02", 12.0))
+    (lake / "_health").mkdir()
+    out = build("2026-11-02")
+    assert out["top_cards"][0]["price_usd"] == 36.0
+    assert out["compared_to"] == "2026-11-01"
+    assert out["movers"][0]["change_pct"] == 20.0
