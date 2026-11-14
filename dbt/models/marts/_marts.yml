@@ -2,10 +2,37 @@ version: 2
 
 models:
   - name: fct_daily_prices
-    description: One row per card x marketplace x variant x day, with trailing-week stats.
+    description: >
+      Main analysis table. Grain: one row per card x marketplace (source) x variant x
+      price_date, only rows with a market price. Adds day-on-day change and trailing
+      7-calendar-day statistics for spike detection. Use this table for price questions.
     columns:
       - name: price_key
+        description: Surrogate key, md5 of card_id, source, variant and price_date.
         data_tests: [unique, not_null]
+      - name: market
+        description: Headline price in the row's currency (EUR for cardmarket, USD for tcgplayer).
+      - name: prev_market
+        description: Market price exactly one calendar day earlier; null if that day is missing.
+      - name: avg_prev_7d
+        description: Average market price over the 7 calendar days before price_date.
+      - name: sd_prev_7d
+        description: Sample standard deviation of market price over the same 7 days.
+      - name: n_prev_7d
+        description: Number of prior days with a price inside the 7-day window.
+      - name: day_change_pct
+        description: Percent change vs exactly yesterday; null when yesterday is missing.
+      - name: zscore_7d
+        description: (market - avg_prev_7d) / sd_prev_7d. How unusual today's price is vs the past week.
+      - name: is_spike
+        description: >
+          True when abs(zscore_7d) >= 3, there are at least 5 prior days in the window,
+          and the price (or its average) is at least 2 in its currency.
+
+  - name: price_spikes
+    description: >
+      Rows of fct_daily_prices where is_spike is true, exported to the lake for
+      alerting. Grain: one row per spiking card x marketplace x variant x price_date.
 
 unit_tests:
   - name: spike_flagged_only_after_enough_history

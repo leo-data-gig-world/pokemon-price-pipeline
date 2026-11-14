@@ -2,20 +2,54 @@ version: 2
 
 models:
   - name: stg_prices
+    description: >
+      Typed raw prices. Grain: one row per card x marketplace (source) x variant x price_date.
+      Cardmarket prices are in EUR, TCGplayer prices in USD; never add them together.
     columns:
       - name: price_key
+        description: Surrogate key, md5 of card_id, source, variant and price_date.
         data_tests: [unique, not_null]
       - name: price_date
+        description: Date the prices were collected (one partition of the raw lake).
         data_tests: [not_null]
+      - name: card_id
+        description: TCGdex card id, e.g. sv03.5-006. Unique per printed card, not per variant.
+      - name: set_id
+        description: TCGdex set id, e.g. sv03.5 (151), sv08.5 (Prismatic Evolutions), sv10 (Destined Rivals).
+      - name: card_name
+        description: Card name as published by the source API. Free text from an external system.
+      - name: rarity
+        description: Rarity label from the source, e.g. Common, Double rare.
       - name: source
+        description: Marketplace the price comes from, cardmarket or tcgplayer.
         data_tests:
           - accepted_values:
               arguments:
                 values: [cardmarket, tcgplayer]
+      - name: variant
+        description: Print variant, e.g. normal, holo (cardmarket) or holofoil, reverse-holofoil (tcgplayer).
       - name: currency
+        description: EUR for cardmarket, USD for tcgplayer.
         data_tests:
           - accepted_values:
               arguments:
                 values: [EUR, USD]
+      - name: low
+        description: Lowest current listing price.
+      - name: mid
+        description: Median listing price (tcgplayer only).
+      - name: high
+        description: Highest listing price (tcgplayer only).
       - name: market
+        description: >
+          Headline price used everywhere downstream. tcgplayer market price, or the
+          cardmarket average sell price.
         data_tests: [positive]
+      - name: trend
+        description: Cardmarket trend price (cardmarket only).
+      - name: avg7
+        description: Cardmarket 7-day average sell price, as reported by cardmarket.
+      - name: avg30
+        description: Cardmarket 30-day average sell price, as reported by cardmarket.
+      - name: source_updated_at
+        description: When the marketplace last refreshed this price.
