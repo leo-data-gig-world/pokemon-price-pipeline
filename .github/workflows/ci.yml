@@ -16,6 +16,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

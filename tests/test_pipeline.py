@@ -86,7 +86,7 @@ def test_checks_fail_when_prices_missing(lake):
 def test_dag_loads():
     pytest.importorskip("airflow")
     from airflow.models import DagBag
-    bag = DagBag(dag_folder=str(Path(__file__).parents[1] / "dags"), include_examples=False)
+    bag = DagBag(dag_folder=str(Path(__file__).parents[1] / "dags"))
     assert bag.import_errors == {}
     d = bag.get_dag("pokemon_prices")
     assert [t.task_id for t in d.tasks] == ["extract_prices", "check_quality"]
