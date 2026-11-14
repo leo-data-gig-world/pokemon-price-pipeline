@@ -12,6 +12,8 @@ on:
 
 permissions:
   contents: write
+  pages: write      # publish the dbt docs site
+  id-token: write
 
 concurrency:
   group: daily-pipeline
@@ -63,6 +65,13 @@ jobs:
           print(json.dumps(r, indent=2))
           sys.exit(0 if r["passed"] else 1)
           PY
+      - name: Build dbt docs (models, tests, lineage)
+        run: |
+          "$DBT_BIN" docs generate --project-dir dbt --profiles-dir dbt --static
+          mkdir -p _site && cp dbt/target/static_index.html _site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
       - name: Save the day's data
         run: |
           git config user.name "pipeline-bot"
@@ -70,3 +79,13 @@ jobs:
           git add lake
           git commit -m "data: prices for ${DS}" || { echo "nothing new"; exit 0; }
           git pull --rebase && git push
+
+  docs:
+    needs: run
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

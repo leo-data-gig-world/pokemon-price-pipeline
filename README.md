@@ -39,6 +39,7 @@ and web UI, which a one-task-a-day pipeline doesn't need.
 | Summary for the site | [`pipeline/summary.py`](pipeline/summary.py) | Priciest cards and biggest day-on-day movers, read live by my portfolio page |
 | Alerts | [`pipeline/alerts.py`](pipeline/alerts.py) | Discord webhook on final failure; GitHub emails on a failed run |
 | CI | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Lint, unit tests, and a test that the DAG loads in real Airflow, on every PR |
+| dbt docs | [live site](https://leo-data-gig-world.github.io/pokemon-price-pipeline/) | Models, tests and lineage graph, rebuilt and published by every daily run |
 | Scheduled run | [`.github/workflows/daily.yml`](.github/workflows/daily.yml) | Cron schedule, manual backfill by date, run fails if quality fails |
 
 dbt runs in its own virtualenv, so its dependencies never fight Airflow's pinned
