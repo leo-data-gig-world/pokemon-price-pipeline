@@ -3,7 +3,7 @@
   "rows": 2099,
   "previous_rows": null,
   "priced_share": 1.0,
-  "source_age_hours": 21.2,
+  "source_age_hours": 22.7,
   "checks": {
     "row_count": true,
     "no_big_drop": true,
@@ -12,5 +12,5 @@
     "fresh": true
   },
   "passed": true,
-  "checked_at": "2026-11-14T19:29:04+00:00"
+  "checked_at": "2026-11-14T20:58:32+00:00"
 }
