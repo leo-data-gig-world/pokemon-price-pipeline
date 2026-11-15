@@ -35,15 +35,18 @@ jobs:
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
       INPUT_DATE: ${{ inputs.date }}
+    outputs:
+      skip: ${{ steps.pick.outputs.skip }}
     steps:
       - uses: actions/checkout@v4
       - name: Pick the date (skip the backup run if today already passed)
+        id: pick
         run: |
           DS="${INPUT_DATE:-$(date -u +%F)}"
           [[ "$DS" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "bad date: $DS"; exit 1; }
           echo "DS=$DS" >> "$GITHUB_ENV"
           if [ "$GITHUB_EVENT_NAME" = "schedule" ] && grep -qs '"status": "passed"' "lake/_health/runs/$DS.json"; then
-            echo "Today's run already passed; nothing to do."; echo "SKIP=1" >> "$GITHUB_ENV"
+            echo "Today's run already passed; nothing to do."; echo "SKIP=1" >> "$GITHUB_ENV"; echo "skip=1" >> "$GITHUB_OUTPUT"
           fi
       - uses: actions/setup-python@v5
         if: env.SKIP != '1'
@@ -97,6 +100,7 @@ jobs:
 
   docs:
     needs: run
+    if: needs.run.outputs.skip != '1'   # skipped backup run builds no docs, so nothing to deploy
     runs-on: ubuntu-latest
     environment:
       name: github-pages
