@@ -4,6 +4,7 @@ name: daily-pipeline
 on:
   schedule:
     - cron: "30 6 * * *"          # 06:30 UTC; prices refresh around 03:00 UTC
+    - cron: "30 10 * * *"         # backup: GitHub can delay or drop scheduled runs; skipped if 06:30 passed
   workflow_dispatch:
     inputs:
       date:
@@ -36,43 +37,57 @@ jobs:
       INPUT_DATE: ${{ inputs.date }}
     steps:
       - uses: actions/checkout@v4
+      - name: Pick the date (skip the backup run if today already passed)
+        run: |
+          DS="${INPUT_DATE:-$(date -u +%F)}"
+          [[ "$DS" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "bad date: $DS"; exit 1; }
+          echo "DS=$DS" >> "$GITHUB_ENV"
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && grep -qs '"status": "passed"' "lake/_health/runs/$DS.json"; then
+            echo "Today's run already passed; nothing to do."; echo "SKIP=1" >> "$GITHUB_ENV"
+          fi
       - uses: actions/setup-python@v5
+        if: env.SKIP != '1'
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
       - name: Install Airflow and pipeline deps
+        if: env.SKIP != '1'
         run: |
           pip install "apache-airflow==${AIRFLOW_VERSION}" \
             --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
           pip install -r requirements.txt
       - name: Install dbt in its own virtualenv (keeps Airflow's pins clean)
+        if: env.SKIP != '1'
         run: |
           python -m venv .venv-dbt
           .venv-dbt/bin/pip install -q "dbt-duckdb==${DBT_DUCKDB_VERSION}"
           echo "DBT_BIN=${GITHUB_WORKSPACE}/.venv-dbt/bin/dbt" >> "$GITHUB_ENV"
       - name: Run the DAG
+        if: env.SKIP != '1'
         run: |
-          DS="${INPUT_DATE:-$(date -u +%F)}"
-          [[ "$DS" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "bad date: $DS"; exit 1; }
-          echo "DS=$DS" >> "$GITHUB_ENV"
           airflow db migrate
           airflow dags test pokemon_prices "$DS"
-      - name: Fail the job if data quality failed
+      - name: Fail the job if any stage failed
+        if: always() && env.SKIP != '1'
         run: |
           python - <<'PY'
           import json, os, sys
-          r = json.load(open(f"lake/_health/{os.environ['DS']}.json"))
+          path = f"lake/_health/runs/{os.environ['DS']}.json"
+          r = json.load(open(path)) if os.path.exists(path) else {"status": "no record"}
           print(json.dumps(r, indent=2))
-          sys.exit(0 if r["passed"] else 1)
+          sys.exit(0 if r.get("status") == "passed" else 1)
           PY
       - name: Build dbt docs (models, tests, lineage)
+        if: env.SKIP != '1'
         run: |
           "$DBT_BIN" docs generate --project-dir dbt --profiles-dir dbt --static
           mkdir -p _site && cp dbt/target/static_index.html _site/index.html
       - uses: actions/upload-pages-artifact@v3
+        if: env.SKIP != '1'
         with:
           path: _site
-      - name: Save the day's data
+      - name: Save the day's data and run record (failed runs too, so monitoring sees them)
+        if: always() && env.SKIP != '1'
         run: |
           git config user.name "pipeline-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

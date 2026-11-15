@@ -61,6 +61,8 @@ def lake(tmp_path, monkeypatch):
     monkeypatch.setattr(summary, "LAKE", tmp_path)
     from pipeline import spikes
     monkeypatch.setattr(spikes, "LAKE", tmp_path)
+    from pipeline import metrics
+    monkeypatch.setattr(metrics, "LAKE", tmp_path)
     return tmp_path
 
 
@@ -93,7 +95,8 @@ def test_dag_loads():
     bag = DagBag(dag_folder=str(Path(__file__).parents[1] / "dags"))
     assert bag.import_errors == {}
     d = bag.dags["pokemon_prices"]  # in-memory; get_dag() needs a database in Airflow 3
-    assert sorted(t.task_id for t in d.tasks) == sorted(["extract_prices", "check_quality", "dbt_build", "publish_summary", "alert_spikes"])
+    assert sorted(t.task_id for t in d.tasks) == sorted(["extract_prices", "check_quality", "dbt_build", "publish_summary", "alert_spikes",
+                    "record_run"])
     assert d.default_args["retries"] == 2
 
 
@@ -128,3 +131,73 @@ def test_spike_alert_ignores_empty_export_and_other_days(lake, monkeypatch):
     pq.write_table(tbl, lake / "marts" / "price_spikes.parquet")
     assert spikes.alert("2026-11-02") == 1
     assert "Umbreon ex" in sent[0]
+
+
+def _all_stages_ok(ds):
+    from pipeline import metrics
+    metrics.start_run(ds)
+    for st in metrics.STAGES:
+        with metrics.timed(ds, st) as m:
+            m["note"] = "ok"
+
+
+def test_finish_run_passes_and_builds_history(lake):
+    from pipeline import metrics
+    _write_day(lake, "2026-11-01", _rows(200, "2026-11-01"))
+    (lake / "_health").mkdir()
+    _all_stages_ok("2026-11-01")
+    assert metrics.finish_run("2026-11-01")["status"] == "passed"
+    hist = json.loads((lake / "_health" / "history.json").read_text())
+    assert [d["date"] for d in hist["days"]] == ["2026-11-01"]
+    assert set(hist["days"][0]["seconds"]) == set(metrics.STAGES)
+
+
+def test_failed_stage_is_recorded_and_raises(lake):
+    from pipeline import metrics
+    (lake / "_health").mkdir()
+    metrics.start_run("2026-11-02")
+    with pytest.raises(ValueError), metrics.timed("2026-11-02", "extract"):
+        raise ValueError("API down")
+    with pytest.raises(RuntimeError, match="extract"):
+        metrics.finish_run("2026-11-02")
+    day = json.loads((lake / "_health" / "history.json").read_text())["days"][0]
+    assert day["status"] == "failed" and day["failed_stage"] == "extract"
+
+
+def test_rerun_starts_fresh(lake):
+    from pipeline import metrics
+    (lake / "_health").mkdir()
+    _all_stages_ok("2026-11-03")
+    metrics.start_run("2026-11-03")                       # re-run: old stages must not linger
+    with pytest.raises(RuntimeError, match="extract"):
+        metrics.finish_run("2026-11-03")
+
+
+def test_history_includes_days_from_before_monitoring(lake):
+    from pipeline import metrics
+    (lake / "_health").mkdir()
+    (lake / "_health" / "2026-10-31.json").write_text(json.dumps(
+        {"date": "2026-10-31", "rows": 150, "passed": True, "checks": {"a": True, "b": True}}))
+    day = metrics.build_history()["days"][0]
+    assert day["status"] == "passed" and day["rows"] == 150 and day["seconds"] is None
+
+
+def test_watchlist_tracks_top_cards_over_days(lake):
+    from pipeline import metrics
+    for d, price in [("2026-11-01", 10.0), ("2026-11-02", 12.0)]:
+        r = _rows(3, d)
+        for i, x in enumerate(r):
+            x.update(source="tcgplayer", variant="holofoil", market=price * (i + 1), card_name=f"c{i}")
+        _write_day(lake, d, r)
+    (lake / "_health").mkdir()
+    wl = metrics.build_history()["watchlist"]["cards"]
+    assert wl[0]["card"] == "c2" and [p["usd"] for p in wl[0]["points"]] == [30.0, 36.0]
+
+
+def test_dbt_summary_counts(tmp_path):
+    from pipeline.transform import summarize
+    p = tmp_path / "run_results.json"
+    p.write_text(json.dumps({"results": [
+        {"unique_id": "model.x.a", "status": "success"}, {"unique_id": "test.x.t1", "status": "pass"},
+        {"unique_id": "test.x.t2", "status": "fail"}, {"unique_id": "unit_test.x.u", "status": "pass"}]}))
+    assert summarize(p) == {"tests_pass": 2, "tests_fail": 1, "tests_warn": 0, "models_ok": 1, "models_error": 0}

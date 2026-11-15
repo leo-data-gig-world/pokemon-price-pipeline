@@ -1,5 +1,7 @@
 # Pokémon card price pipeline
 
+[![daily-pipeline](https://github.com/leo-data-gig-world/pokemon-price-pipeline/actions/workflows/daily.yml/badge.svg)](https://github.com/leo-data-gig-world/pokemon-price-pipeline/actions/workflows/daily.yml) [![ci](https://github.com/leo-data-gig-world/pokemon-price-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/leo-data-gig-world/pokemon-price-pipeline/actions/workflows/ci.yml)
+
 A small, real data pipeline: every morning it pulls Pokémon card prices from two
 marketplaces, checks the data, and stores one partition per day in a Parquet data lake.
 
@@ -37,6 +39,7 @@ and web UI, which a one-task-a-day pipeline doesn't need.
 | dbt tests | [`_marts.yml`](dbt/models/marts/_marts.yml) | Unique/not-null keys, accepted values, a custom `positive` test, a currency-vs-marketplace check, and a **unit test** for the spike logic |
 | Spike alerts | [`pipeline/spikes.py`](pipeline/spikes.py) | Alerts on today's spikes and publishes them for the site |
 | Summary for the site | [`pipeline/summary.py`](pipeline/summary.py) | Priciest cards and biggest day-on-day movers, read live by my portfolio page |
+| Run monitoring | [`pipeline/metrics.py`](pipeline/metrics.py) | Every stage records its timing and result, failed runs included; `history.json` feeds the [monitoring page](https://leo-data-gig-world.github.io/monitoring/) |
 | Alerts | [`pipeline/alerts.py`](pipeline/alerts.py) | Discord webhook on final failure; GitHub emails on a failed run |
 | CI | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Lint, unit tests, and a test that the DAG loads in real Airflow, on every PR |
 | dbt docs | [live site](https://leo-data-gig-world.github.io/pokemon-price-pipeline/) | Models, tests and lineage graph, rebuilt and published by every daily run |
@@ -49,6 +52,19 @@ any logic change apply to all history at once.
 
 Merging to `main` ships the code to the next scheduled run (continuous delivery,
 without a server to deploy to).
+
+## Monitoring
+
+**Live dashboard: https://leo-data-gig-world.github.io/monitoring/**
+
+Every run writes `lake/_health/runs/<date>.json`: each stage's duration and result, rows
+loaded, quality checks, dbt test counts (from dbt's own `run_results.json`) and spikes found.
+A final task runs even when an earlier one fails, so a failed day is recorded, not lost,
+and a day with no record at all shows up as a missed run.
+
+Scheduled GitHub Actions runs can be delayed or dropped under load (it happened on day 2),
+so a backup schedule runs at 10:30 UTC and exits early if the 06:30 run already passed.
+Re-running a day is safe because every load is idempotent.
 
 ## Data
 
