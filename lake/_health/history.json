@@ -1,0 +1,124 @@
+{
+  "generated_at": "2026-11-15T11:56:32+00:00",
+  "days": [
+    {
+      "date": "2026-11-14",
+      "status": "passed",
+      "failed_stage": null,
+      "trigger": null,
+      "run_url": null,
+      "rows": 2099,
+      "priced_share": 1.0,
+      "source_age_hours": 22.7,
+      "checks_passed": 5,
+      "checks_total": 5,
+      "tests_pass": null,
+      "tests_fail": null,
+      "models_ok": null,
+      "seconds": null,
+      "spikes": null
+    },
+    {
+      "date": "2026-11-15",
+      "status": "passed",
+      "failed_stage": null,
+      "trigger": "workflow_dispatch",
+      "run_url": "https://github.com/leo-data-gig-world/pokemon-price-pipeline/actions/runs/43710832806",
+      "rows": 2099,
+      "priced_share": 1.0,
+      "source_age_hours": 13.7,
+      "checks_passed": 5,
+      "checks_total": 5,
+      "tests_pass": 11,
+      "tests_fail": 0,
+      "models_ok": 3,
+      "seconds": {
+        "extract": 8.3,
+        "checks": 0.0,
+        "dbt": 5.9,
+        "summary": 0.0,
+        "spikes": 0.0
+      },
+      "spikes": 0
+    }
+  ],
+  "watchlist": {
+    "cards": [
+      {
+        "card": "Umbreon ex",
+        "set": "sv08.5",
+        "variant": "holofoil",
+        "points": [
+          {
+            "date": "2026-11-14",
+            "usd": 1186.84
+          },
+          {
+            "date": "2026-11-15",
+            "usd": 1186.84
+          }
+        ]
+      },
+      {
+        "card": "Sylveon ex",
+        "set": "sv08.5",
+        "variant": "holofoil",
+        "points": [
+          {
+            "date": "2026-11-14",
+            "usd": 370.54
+          },
+          {
+            "date": "2026-11-15",
+            "usd": 376.22
+          }
+        ]
+      },
+      {
+        "card": "Charizard ex",
+        "set": "sv03.5",
+        "variant": "holofoil",
+        "points": [
+          {
+            "date": "2026-11-14",
+            "usd": 291.39
+          },
+          {
+            "date": "2026-11-15",
+            "usd": 292.22
+          }
+        ]
+      },
+      {
+        "card": "Team Rocket's Mewtwo ex",
+        "set": "sv10",
+        "variant": "holofoil",
+        "points": [
+          {
+            "date": "2026-11-14",
+            "usd": 283.54
+          },
+          {
+            "date": "2026-11-15",
+            "usd": 278.75
+          }
+        ]
+      },
+      {
+        "card": "Leafeon ex",
+        "set": "sv08.5",
+        "variant": "holofoil",
+        "points": [
+          {
+            "date": "2026-11-14",
+            "usd": 264.82
+          },
+          {
+            "date": "2026-11-15",
+            "usd": 262.78
+          }
+        ]
+      }
+    ]
+  }
+}
