@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-15",
+  "date": "2026-11-16",
   "cards_priced": 1049,
   "top_cards": [
     {
@@ -18,104 +18,104 @@
       "card": "Charizard ex",
       "set": "sv03.5",
       "variant": "holofoil",
-      "price_usd": 292.22
+      "price_usd": 287.6
     },
     {
       "card": "Team Rocket's Mewtwo ex",
       "set": "sv10",
       "variant": "holofoil",
-      "price_usd": 278.75
+      "price_usd": 277.49
     },
     {
       "card": "Leafeon ex",
       "set": "sv08.5",
       "variant": "holofoil",
-      "price_usd": 262.78
+      "price_usd": 259.02
     },
     {
       "card": "Glaceon ex",
       "set": "sv08.5",
       "variant": "holofoil",
-      "price_usd": 235.94
+      "price_usd": 230.26
     },
     {
       "card": "Espeon ex",
       "set": "sv08.5",
       "variant": "holofoil",
-      "price_usd": 231.88
+      "price_usd": 228.71
     },
     {
       "card": "Vaporeon ex",
       "set": "sv08.5",
       "variant": "holofoil",
-      "price_usd": 207.01
+      "price_usd": 203.71
     }
   ],
   "movers": [
     {
+      "card": "Emcee's Hype",
+      "set": "sv10",
+      "variant": "holofoil",
+      "price_usd": 2.06,
+      "prev_usd": 1.81,
+      "change_pct": 13.8
+    },
+    {
+      "card": "Team Rocket's Raticate",
+      "set": "sv10",
+      "variant": "holofoil",
+      "price_usd": 4.22,
+      "prev_usd": 3.8,
+      "change_pct": 11.1
+    },
+    {
+      "card": "Jolteon ex",
+      "set": "sv08.5",
+      "variant": "holofoil",
+      "price_usd": 2.73,
+      "prev_usd": 2.53,
+      "change_pct": 7.9
+    },
+    {
       "card": "Gengar",
       "set": "sv03.5",
       "variant": "holofoil",
-      "price_usd": 2.3,
-      "prev_usd": 2.65,
-      "change_pct": -13.2
+      "price_usd": 2.13,
+      "prev_usd": 2.3,
+      "change_pct": -7.4
     },
     {
-      "card": "Espeon ex",
-      "set": "sv08.5",
-      "variant": "holofoil",
-      "price_usd": 2.93,
-      "prev_usd": 2.64,
-      "change_pct": 11.0
-    },
-    {
-      "card": "Rotom",
+      "card": "Clamperl",
       "set": "sv10",
       "variant": "holofoil",
-      "price_usd": 2.72,
-      "prev_usd": 2.51,
-      "change_pct": 8.4
-    },
-    {
-      "card": "Teal Mask Ogerpon ex",
-      "set": "sv08.5",
-      "variant": "holofoil",
-      "price_usd": 2.9,
-      "prev_usd": 3.16,
-      "change_pct": -8.2
-    },
-    {
-      "card": "Switch",
-      "set": "sv03.5",
-      "variant": "holofoil",
-      "price_usd": 2.27,
-      "prev_usd": 2.11,
-      "change_pct": 7.6
+      "price_usd": 3.35,
+      "prev_usd": 3.61,
+      "change_pct": -7.2
     },
     {
       "card": "Electrike",
       "set": "sv10",
       "variant": "holofoil",
-      "price_usd": 2.68,
-      "prev_usd": 2.87,
-      "change_pct": -6.6
+      "price_usd": 2.87,
+      "prev_usd": 2.68,
+      "change_pct": 7.1
     },
     {
-      "card": "Vaporeon ex",
+      "card": "Arbok ex",
+      "set": "sv03.5",
+      "variant": "holofoil",
+      "price_usd": 6.04,
+      "prev_usd": 5.65,
+      "change_pct": 6.9
+    },
+    {
+      "card": "Leafeon ex",
       "set": "sv08.5",
       "variant": "holofoil",
-      "price_usd": 2.93,
-      "prev_usd": 3.13,
-      "change_pct": -6.4
-    },
-    {
-      "card": "Ethan's Ho-Oh ex",
-      "set": "sv10",
-      "variant": "holofoil",
-      "price_usd": 5.88,
-      "prev_usd": 5.53,
-      "change_pct": 6.3
+      "price_usd": 2.95,
+      "prev_usd": 3.17,
+      "change_pct": -6.9
     }
   ],
-  "compared_to": "2026-11-14"
+  "compared_to": "2026-11-15"
 }
