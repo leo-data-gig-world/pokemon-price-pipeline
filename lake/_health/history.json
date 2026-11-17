@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-16T16:18:21+00:00",
+  "generated_at": "2026-11-17T16:34:33+00:00",
   "days": [
     {
       "date": "2026-11-14",
@@ -63,6 +63,29 @@
         "spikes": 0.0
       },
       "spikes": 0
+    },
+    {
+      "date": "2026-11-17",
+      "status": "passed",
+      "failed_stage": null,
+      "trigger": "schedule",
+      "run_url": "https://github.com/leo-data-gig-world/pokemon-price-pipeline/actions/runs/44125137929",
+      "rows": 2099,
+      "priced_share": 1.0,
+      "source_age_hours": 18.3,
+      "checks_passed": 5,
+      "checks_total": 5,
+      "tests_pass": 11,
+      "tests_fail": 0,
+      "models_ok": 3,
+      "seconds": {
+        "extract": 12.7,
+        "checks": 0.0,
+        "dbt": 5.8,
+        "summary": 0.0,
+        "spikes": 0.0
+      },
+      "spikes": 0
     }
   ],
   "watchlist": {
@@ -83,6 +106,10 @@
           {
             "date": "2026-11-16",
             "usd": 1186.84
+          },
+          {
+            "date": "2026-11-17",
+            "usd": 1175.85
           }
         ]
       },
@@ -101,6 +128,10 @@
           },
           {
             "date": "2026-11-16",
+            "usd": 376.22
+          },
+          {
+            "date": "2026-11-17",
             "usd": 376.22
           }
         ]
@@ -121,6 +152,10 @@
           {
             "date": "2026-11-16",
             "usd": 287.6
+          },
+          {
+            "date": "2026-11-17",
+            "usd": 285.96
           }
         ]
       },
@@ -140,6 +175,10 @@
           {
             "date": "2026-11-16",
             "usd": 277.49
+          },
+          {
+            "date": "2026-11-17",
+            "usd": 276.27
           }
         ]
       },
@@ -158,6 +197,10 @@
           },
           {
             "date": "2026-11-16",
+            "usd": 259.02
+          },
+          {
+            "date": "2026-11-17",
             "usd": 259.02
           }
         ]
