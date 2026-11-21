@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-21",
+  "rows": 2099,
+  "previous_rows": 2099,
+  "priced_share": 1.0,
+  "source_age_hours": 16.6,
+  "checks": {
+    "row_count": true,
+    "no_big_drop": true,
+    "keys_not_null": true,
+    "mostly_priced": true,
+    "fresh": true
+  },
+  "passed": true,
+  "checked_at": "2026-11-21T14:53:02+00:00"
+}

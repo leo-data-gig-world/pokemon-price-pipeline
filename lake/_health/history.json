@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-20T15:42:55+00:00",
+  "generated_at": "2026-11-21T14:53:08+00:00",
   "days": [
     {
       "date": "2026-11-14",
@@ -155,6 +155,29 @@
         "spikes": 0.0
       },
       "spikes": 19
+    },
+    {
+      "date": "2026-11-21",
+      "status": "passed",
+      "failed_stage": null,
+      "trigger": "schedule",
+      "run_url": "https://github.com/leo-data-gig-world/pokemon-price-pipeline/actions/runs/44916136335",
+      "rows": 2099,
+      "priced_share": 1.0,
+      "source_age_hours": 16.6,
+      "checks_passed": 5,
+      "checks_total": 5,
+      "tests_pass": 11,
+      "tests_fail": 0,
+      "models_ok": 3,
+      "seconds": {
+        "extract": 9.0,
+        "checks": 0.0,
+        "dbt": 5.1,
+        "summary": 0.0,
+        "spikes": 0.0
+      },
+      "spikes": 13
     }
   ],
   "watchlist": {
@@ -191,6 +214,10 @@
           {
             "date": "2026-11-20",
             "usd": 1138.79
+          },
+          {
+            "date": "2026-11-21",
+            "usd": 1132.83
           }
         ]
       },
@@ -226,41 +253,10 @@
           {
             "date": "2026-11-20",
             "usd": 374.94
-          }
-        ]
-      },
-      {
-        "card": "Charizard ex",
-        "set": "sv03.5",
-        "variant": "holofoil",
-        "points": [
-          {
-            "date": "2026-11-14",
-            "usd": 291.39
           },
           {
-            "date": "2026-11-15",
-            "usd": 292.22
-          },
-          {
-            "date": "2026-11-16",
-            "usd": 287.6
-          },
-          {
-            "date": "2026-11-17",
-            "usd": 285.96
-          },
-          {
-            "date": "2026-11-18",
-            "usd": 283.39
-          },
-          {
-            "date": "2026-11-19",
-            "usd": 287.93
-          },
-          {
-            "date": "2026-11-20",
-            "usd": 281.34
+            "date": "2026-11-21",
+            "usd": 377.39
           }
         ]
       },
@@ -296,6 +292,49 @@
           {
             "date": "2026-11-20",
             "usd": 280.43
+          },
+          {
+            "date": "2026-11-21",
+            "usd": 279.99
+          }
+        ]
+      },
+      {
+        "card": "Charizard ex",
+        "set": "sv03.5",
+        "variant": "holofoil",
+        "points": [
+          {
+            "date": "2026-11-14",
+            "usd": 291.39
+          },
+          {
+            "date": "2026-11-15",
+            "usd": 292.22
+          },
+          {
+            "date": "2026-11-16",
+            "usd": 287.6
+          },
+          {
+            "date": "2026-11-17",
+            "usd": 285.96
+          },
+          {
+            "date": "2026-11-18",
+            "usd": 283.39
+          },
+          {
+            "date": "2026-11-19",
+            "usd": 287.93
+          },
+          {
+            "date": "2026-11-20",
+            "usd": 281.34
+          },
+          {
+            "date": "2026-11-21",
+            "usd": 279.23
           }
         ]
       },
@@ -330,6 +369,10 @@
           },
           {
             "date": "2026-11-20",
+            "usd": 254.87
+          },
+          {
+            "date": "2026-11-21",
             "usd": 254.87
           }
         ]
