@@ -1,0 +1,43 @@
+{
+  "date": "2026-11-25",
+  "started_at": "2026-11-25T17:31:46+00:00",
+  "stages": {
+    "extract": {
+      "rows": 2099,
+      "ok": true,
+      "seconds": 13.8,
+      "recorded_at": "2026-11-25T17:32:00+00:00"
+    },
+    "checks": {
+      "ok": true,
+      "seconds": 0.0,
+      "recorded_at": "2026-11-25T17:32:00+00:00"
+    },
+    "dbt": {
+      "tests_pass": 11,
+      "tests_fail": 0,
+      "tests_warn": 0,
+      "models_ok": 3,
+      "models_error": 0,
+      "ok": true,
+      "seconds": 5.9,
+      "recorded_at": "2026-11-25T17:32:06+00:00"
+    },
+    "summary": {
+      "ok": true,
+      "seconds": 0.0,
+      "recorded_at": "2026-11-25T17:32:06+00:00"
+    },
+    "spikes": {
+      "spikes": 9,
+      "ok": true,
+      "seconds": 0.0,
+      "recorded_at": "2026-11-25T17:32:06+00:00"
+    }
+  },
+  "trigger": "schedule",
+  "run_url": "https://github.com/leo-data-gig-world/pokemon-price-pipeline/actions/runs/45665550048",
+  "status": "passed",
+  "failed_stage": null,
+  "finished_at": "2026-11-25T17:32:06+00:00"
+}
